@@ -15,7 +15,8 @@ import {
   MeshPhongMaterial,
   PerspectiveCamera,
   Scene,
-  WebGLRenderer
+  WebGLRenderer,
+  PMREMGenerator
 } from 'three';
 
 // XR Emulator
@@ -51,6 +52,8 @@ import {
 import {
   GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js';
+
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // Example of hard link to official repo for data, if needed
 // const MODEL_PATH = 'https://raw.githubusercontent.com/mrdoob/three.js/r173/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb';
@@ -97,6 +100,7 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
+const objects = [];
 
 const clock = new Clock();
 
@@ -119,12 +123,12 @@ const init = () => {
   camera = new PerspectiveCamera(75, aspect, 0.1, 10); // meters
   camera.position.set(0, 1.6, 3);
 
-  const light = new AmbientLight(0xffffff, 1.0); // soft white light
-  scene.add(light);
+  // const light = new AmbientLight(0xffffff, 1.0); // soft white light
+  // scene.add(light);
 
-  const hemiLight = new HemisphereLight(0xffffff, 0xbbbbff, 3);
-  hemiLight.position.set(0.5, 1, 0.25);
-  scene.add(hemiLight);
+  // const hemiLight = new HemisphereLight(0xffffff, 0xbbbbff, 3);
+  // hemiLight.position.set(0.5, 1, 0.25);
+  // scene.add(hemiLight);
 
   renderer = new WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -139,6 +143,12 @@ const init = () => {
     'depthSensing': { 'usagePreference': [ 'gpu-optimized' ], 'dataFormatPreference': [] }
   } ) );
 */
+
+  const environment = new RoomEnvironment();
+  const pmremGenerator = new PMREMGenerator(renderer);
+
+  scene.environment = pmremGenerator.fromScene(environment).texture;
+
 
   const xrButton = XRButton.createButton(renderer, {});
   xrButton.style.backgroundColor = 'skyblue';
@@ -161,13 +171,13 @@ const init = () => {
     mesh.quaternion.setFromRotationMatrix(controller.matrixWorld);
     scene.add(mesh);
 
-  }
+    objects[0].position.set(0, 0, - 0.2).applyMatrix4(controller.matrixWorld);
+    objects[0].rotateY
 
+  }
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
-
-
   window.addEventListener('resize', onWindowResize, false);
 
 }
@@ -176,11 +186,11 @@ init();
 
 //
 
-/*
+
 function loadData() {
   new GLTFLoader()
     .setPath('assets/models/')
-    .load('test.glb', gltfReader);
+    .load('./targetA.glb', gltfReader);
 }
 
 
@@ -191,6 +201,7 @@ function gltfReader(gltf) {
 
   if (testModel != null) {
     console.log("Model loaded:  " + testModel);
+    objects.push(testModel);
     scene.add(gltf.scene);
   } else {
     console.log("Load FAILED.  ");
@@ -198,10 +209,10 @@ function gltfReader(gltf) {
 }
 
 loadData();
-*/
 
 
-// camera.position.z = 3;
+
+camera.position.z = 3;
 
 
 

@@ -3,7 +3,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import glsl from 'vite-plugin-glsl';
 
 export default defineConfig({
-    base: "/three_xr",
+    base: "/three_xr/",
     clearScreen: false,
     optimizeDeps: {
         esbuildOptions: {
@@ -23,7 +23,7 @@ export default defineConfig({
     },
     server: {
         open: true,
-        allowedHosts: ['.trycloudflare.com']
+        allowedHosts: ['.trycloudflare.com', '.ngrok-free.app']
     },
     plugins: [
         viteStaticCopy({
