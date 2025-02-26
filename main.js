@@ -45,9 +45,6 @@ import { XRButton } from 'three/addons/webxr/XRButton.js';
 // See vite.config.js
 // 
 // Consider using alternatives like Oimo or cannon-es
-import {
-  OrbitControls
-} from 'three/addons/controls/OrbitControls.js';
 
 import {
   GLTFLoader
@@ -57,42 +54,6 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // Example of hard link to official repo for data, if needed
 // const MODEL_PATH = 'https://raw.githubusercontent.com/mrdoob/three.js/r173/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb';
-
-async function setupXR(xrMode) {
-
-  if (xrMode !== 'immersive-vr') return;
-
-  // iwer setup: emulate vr session
-  let nativeWebXRSupport = false;
-  if (navigator.xr) {
-    nativeWebXRSupport = await navigator.xr.isSessionSupported(xrMode);
-  }
-
-  if (!nativeWebXRSupport) {
-    const xrDevice = new XRDevice(metaQuest3);
-    xrDevice.installRuntime();
-    xrDevice.fovy = (75 / 180) * Math.PI;
-    xrDevice.ipd = 0;
-    window.xrdevice = xrDevice;
-    xrDevice.controllers.right.position.set(0.15649, 1.43474, -0.38368);
-    xrDevice.controllers.right.quaternion.set(
-      0.14766305685043335,
-      0.02471366710960865,
-      -0.0037767395842820406,
-      0.9887216687202454,
-    );
-    xrDevice.controllers.left.position.set(-0.15649, 1.43474, -0.38368);
-    xrDevice.controllers.left.quaternion.set(
-      0.14766305685043335,
-      0.02471366710960865,
-      -0.0037767395842820406,
-      0.9887216687202454,
-    );
-    new DevUI(xrDevice);
-  }
-}
-
-await setupXR('immersive-ar');
 
 
 
@@ -119,9 +80,7 @@ const animate = () => {
 const init = () => {
   scene = new Scene();
 
-  const aspect = window.innerWidth / window.innerHeight;
-  camera = new PerspectiveCamera(75, aspect, 0.1, 10); // meters
-  camera.position.set(0, 1.6, 3);
+  camera = new PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
   // const light = new AmbientLight(0xffffff, 1.0); // soft white light
   // scene.add(light);
@@ -154,25 +113,16 @@ const init = () => {
   xrButton.style.backgroundColor = 'skyblue';
   document.body.appendChild(xrButton);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-  //controls.listenToKeyEvents(window); // optional
-  controls.target.set(0, 1.6, 0);
-  controls.update();
+
 
   // Handle input: see THREE.js webxr_ar_cones
 
-  const geometry = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
   const onSelect = (event) => {
 
-    const material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
-    const mesh = new Mesh(geometry, material);
-    mesh.position.set(0, 0, - 0.3).applyMatrix4(controller.matrixWorld);
-    mesh.quaternion.setFromRotationMatrix(controller.matrixWorld);
-    scene.add(mesh);
 
-    objects[0].position.set(0, 0, - 0.2).applyMatrix4(controller.matrixWorld);
-    objects[0].rotateY
+    objects[0].position.set(0, 1.6, - 0.5).applyMatrix4(controller.matrixWorld);
+
 
   }
   controller = renderer.xr.getController(0);
@@ -202,6 +152,10 @@ function gltfReader(gltf) {
   if (testModel != null) {
     console.log("Model loaded:  " + testModel);
     objects.push(testModel);
+    testModel.rotateY(- Math.PI / 2);
+    if (controller) {
+      testModel.position.set(0, 0, - 0.5).applyMatrix4(controller.matrixWorld);
+    }
     scene.add(gltf.scene);
   } else {
     console.log("Load FAILED.  ");
