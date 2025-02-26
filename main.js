@@ -19,10 +19,42 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 let camera, scene, renderer;
 let controller;
+let loaded = false;
 
 const objects = [];
 
 const clock = new Clock();
+
+
+function printGraph(obj) {
+  console.group(' <%o> ' + obj.name, obj);
+  obj.children.forEach(printGraph);
+  console.groupEnd();
+}
+
+
+function loadData() {
+  new GLTFLoader()
+    .setPath('assets/models/')
+    .load('./targetA.glb', gltfReader);
+}
+
+function gltfReader(gltf) {
+  let testModel = null;
+
+  testModel = gltf.scene;
+
+  if (testModel != null) {
+    console.log("Model loaded:  " + testModel);
+    testModel.rotateY(- Math.PI / 2);
+    testModel.position.set(0.5, 1, - 1.5)
+
+    objects.push(testModel);
+    scene.add(gltf.scene);
+  } else {
+    console.log("Load FAILED.  ");
+  }
+}
 
 const animate = () => {
 
@@ -57,50 +89,33 @@ const init = () => {
 
   const onSelect = (event) => {
 
-    objects[0].position.set(0, 0, - 0.5).applyMatrix4(controller.matrixWorld);
 
   }
+
+  if (!loaded) {
+    loadData();
+    loaded = true;
+  }
+
+  if (loaded) {
+    setInterval(() => {
+      console.log("--------- hello ------------------")
+      objects[0].testModel.position.set(0, 2, - 1)
+
+    }, 5_000)
+  }
+
+
+
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
+
   window.addEventListener('resize', onWindowResize, false);
 
 }
 
 init();
-
-
-function loadData() {
-  new GLTFLoader()
-    .setPath('assets/models/')
-    .load('./targetA.glb', gltfReader);
-}
-
-function gltfReader(gltf) {
-  let testModel = null;
-
-  testModel = gltf.scene;
-
-  if (testModel != null) {
-    console.log("Model loaded:  " + testModel);
-    objects.push(testModel);
-    testModel.rotateY(- Math.PI / 2);
-    if (controller) {
-      testModel.position.set(0, 0, - 0.5).applyMatrix4(controller.matrixWorld);
-    }
-    scene.add(gltf.scene);
-  } else {
-    console.log("Load FAILED.  ");
-  }
-}
-
-loadData();
-
-
-
-camera.position.z = 3;
-
-
 
 
 function onWindowResize() {
