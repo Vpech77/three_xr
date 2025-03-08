@@ -5,33 +5,21 @@ import {
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
-  PMREMGenerator
+  PMREMGenerator,
+  SphereGeometry,
+  MeshBasicMaterial,
+  Mesh,
 } from 'three';
 
-
 import { ARButton } from 'three/addons/webxr/ARButton.js';
-
-import {
-  GLTFLoader
-} from 'three/addons/loaders/GLTFLoader.js';
-
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-
-
-/*************************** Initialisattion des paamtres *************************** */
 
 let camera, scene, renderer;
 let controller;
-let loaded = false;
 const objects = [];
+let bullets = [];
 const clock = new Clock();
-
-
-function printGraph(obj) {
-  console.group(' <%o> ' + obj.name, obj);
-  obj.children.forEach(printGraph);
-  console.groupEnd();
-}
 
 function loadGLTF(name, x, y, z) {
   const loader = new GLTFLoader();
@@ -52,49 +40,92 @@ function loadGLTF(name, x, y, z) {
   });
 }
 
+function generateRandomPosition() {
+  const rangeX = 2;
+  const rangeY = 1;
+  const distanceZ = -2;
 
-function randomMovement(object, elapsed) {
-  const amplitude = 0.5;
-  const frequency = 0.5;
+  const x = (Math.random() * rangeX) - rangeX / 2;
+  const y = Math.random() * rangeY + 0.5;
+  const z = distanceZ;
 
-  object.position.x = Math.sin(elapsed * frequency) * amplitude;
-  object.position.y = Math.cos(elapsed * frequency * 1.5) * amplitude + 1;
-  object.position.z = Math.sin(elapsed * frequency * 0.5) * amplitude - 2;
-}
-
-function shootBullet(event) {
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(mouse, camera);
-
-  const bulletGeometry = new THREE.SphereGeometry(0.1, 32, 32);
-  const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-
-  bullet.position.copy(camera.position);
-  bullet.velocity = raycaster.ray.direction.multiplyScalar(10);
-
-  scene.add(bullet);
-  bullets.push(bullet);
+  return { x, y, z };
 }
 
 
+function spawnNewTarget() {
+  const { x, y, z } = generateRandomPosition();
+
+  const loader = new GLTFLoader();
+  loader.load('assets/models/targetA.glb', function (gltf) {
+    const target = gltf.scene;
+    target.name = 'targetA';
+    target.rotateY(- Math.PI / 2);
+    target.position.set(x, y, z);
+    target.userData.phase = Math.random() * Math.PI * 2;
+    target.userData.startX = x;
+    target.userData.startY = y;
+    target.userData.startZ = z;
+
+    scene.add(target);
+
+  }, undefined, function (error) {
+    console.error('Erreur lors du chargement du modèle :', error);
+  });
+}
+
+function randomMovementWithPhase(object, elapsed) {
+  const amplitude = 1.5;
+  const frequency = 0.2;
+
+  object.userData.startX = object.userData.startX ?? object.position.x;
+  object.userData.startY = object.userData.startY ?? object.position.y;
+  object.userData.startZ = object.userData.startZ ?? object.position.z;
+
+  const phase = object.userData.phase || 0;
+
+  object.position.x = object.userData.startX + Math.sin(elapsed * frequency + phase) * amplitude;
+  object.position.y = object.userData.startY + Math.cos(elapsed * frequency * 1.5 + phase) * amplitude;
+  object.position.z = object.userData.startZ + Math.sin(elapsed * frequency * 0.7 + phase) * amplitude;
+
+}
+
+var speed = 5;
 
 const animate = () => {
-
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
 
   const target = scene.getObjectByName('targetA');
   if (target) {
-    randomMovement(target, elapsed);
+    randomMovementWithPhase(target, elapsed);
   }
 
+  bullets.forEach((bullet, index) => {
+    bullet.translateZ(-speed * delta);
 
+    if (target) {
+      const distance = bullet.position.distanceTo(target.position);
+      if (distance < 0.5) {
+        console.log('Collision détectée !');
 
+        scene.remove(target);
+
+        // target.material.color.set(0xff0000); // Changer la couleur en rouge avant de supprimer
+        setTimeout(() => {
+          spawnNewTarget();
+        }, 500);
+
+        scene.remove(bullet);
+        bullets.splice(index, 1);
+    }}
+
+    if (bullet.position.length() > 20) {
+      scene.remove(bullet);
+      bullets.splice(index, 1);
+    }
+  });
+  
   renderer.render(scene, camera);
 };
 
@@ -117,12 +148,20 @@ const init = () => {
 
 
   const onSelect = (event) => {
-    objects[0].position.set(0, 0.5, -2)
+
+      const bulletGeometry = new SphereGeometry(0.05, 32, 32);
+      const bulletMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+      const bullet = new Mesh(bulletGeometry, bulletMaterial);
+
+      bullet.position.set( 0, 0, 0 ).applyMatrix4( controller.matrixWorld );
+      bullet.quaternion.setFromRotationMatrix( controller.matrixWorld );
+    
+      scene.add(bullet);
+      bullets.push(bullet);
+    
   }
 
-
   loadGLTF('targetA', 0, 1, -2)
-
 
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
