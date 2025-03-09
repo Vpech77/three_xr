@@ -9,16 +9,22 @@ import {
   SphereGeometry,
   MeshBasicMaterial,
   Mesh,
+  Vector3,
+
 } from 'three';
 
 import { ARButton } from 'three/addons/webxr/ARButton.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+
 
 let camera, scene, renderer;
 let controller;
 const objects = [];
-let bullets = [];
+const bullets = [];
+const speed = 5;
 const clock = new Clock();
 
 function loadGLTF(name, x, y, z) {
@@ -90,7 +96,11 @@ function randomMovementWithPhase(object, elapsed) {
 
 }
 
-var speed = 5;
+let score = 0;
+let scoreText;
+
+
+
 
 const animate = () => {
   const delta = clock.getDelta();
@@ -111,10 +121,9 @@ const animate = () => {
 
         scene.remove(target);
 
-        // target.material.color.set(0xff0000); // Changer la couleur en rouge avant de supprimer
         setTimeout(() => {
           spawnNewTarget();
-        }, 500);
+        }, 1_000);
 
         scene.remove(bullet);
         bullets.splice(index, 1);
@@ -125,9 +134,45 @@ const animate = () => {
       bullets.splice(index, 1);
     }
   });
-  
+
+  updateScorePosition();
+
   renderer.render(scene, camera);
 };
+
+
+function updateScorePosition() {
+  const offsetX = 0.5; // Horizontal offset from center (right)
+  const offsetY = -0.5; // Vertical offset from center (down)
+  const offsetZ = -3;  // Distance in front of the camera
+
+  if (scoreText) {
+    // Position the text relative to the camera's position and direction
+    scoreText.position.copy(camera.position); 
+    scoreText.position.add(camera.getWorldDirection(new Vector3()).multiplyScalar(offsetZ));
+
+    // Adjust for bottom-right corner by modifying the X and Y coordinates
+    scoreText.position.x += offsetX;
+    scoreText.position.y += offsetY;
+
+    // Convert 3D world position to 2D screen position (for overlay or UI-like positioning)
+    const screenPosition = new Vector3();
+    scoreText.getWorldPosition(screenPosition);
+
+    screenPosition.project(camera); // This converts the position to normalized device coordinates (NDC)
+
+    // Map NDC (-1 to 1) to screen coordinates (0 to screen width/height)
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    screenPosition.x = (screenPosition.x + 1) / 2 * width;  // Convert to screen space
+    screenPosition.y = -(screenPosition.y - 1) / 2 * height;  // Flip Y to match screen space
+
+    // Use screenPosition to adjust the 3D text on the screen (for overlay or UI positioning)
+    scoreText.position.set(screenPosition.x, screenPosition.y, 0);
+  }
+}
+
+
 
 
 const init = () => {
@@ -162,6 +207,26 @@ const init = () => {
   }
 
   loadGLTF('targetA', 0, 1, -2)
+
+
+
+  const fontLoader = new FontLoader();
+  fontLoader.load('assets/fonts/gentilis_bold.typeface.json', (font) => {   
+  const textGeometry = new TextGeometry(` ${score}`, {
+    font: font,
+    size: 0.1,
+    height: 0.00000000000001,
+
+  });
+
+  const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+  scoreText = new Mesh(textGeometry, textMaterial);
+
+  scoreText.position.set(1, 0, -10);
+
+  scene.add(scoreText);
+
+});
 
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
