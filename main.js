@@ -6,7 +6,6 @@ import {
   Scene,
   WebGLRenderer,
   PMREMGenerator,
-  SphereGeometry,
   MeshBasicMaterial,
   Mesh,
   Audio, 
@@ -101,7 +100,7 @@ function add3DText() {
   loader.load('assets/fonts/gentilis_bold.typeface.json', function(font) {
     const textGeometry = new TextGeometry(`Score: ${score}`, {
       font: font,
-      size: 0.1,
+      size: 0.3,
       depth: 0.02,
       curveSegments: 12,
       bevelEnabled: true,
@@ -116,7 +115,9 @@ function add3DText() {
 
     scoreMesh.name = 'text'
 
-    scoreMesh.position.set(-0.8, 0.5, -1);
+    scoreMesh.position.set(-2, 1, -2).applyMatrix4(controller.matrixWorld);
+    scoreMesh.quaternion.setFromRotationMatrix(controller.matrixWorld);
+
     scene.add(scoreMesh);
 
   });
@@ -148,6 +149,16 @@ function spawnNewTarget() {
     target.userData.startX = x;
     target.userData.startY = y;
     target.userData.startZ = z;
+
+    const animations = gltf.animations;
+
+    if (animations && animations.length > 0) {
+      mixer = new AnimationMixer(target);
+
+      const action = mixer.clipAction(animations[0]);
+      action.play();
+    }
+
     addSoundToGLTFModel(target, 'assets/audio/hey_listen.mp3')
     scene.add(target);
 
@@ -158,7 +169,7 @@ function spawnNewTarget() {
 
 function randomMovementWithPhase(object, elapsed) {
   const amplitude = 1.8;
-  const frequency = 0.8;
+  const frequency = 2;
 
   object.userData.startX = object.userData.startX ?? object.position.x;
   object.userData.startY = object.userData.startY ?? object.position.y;
@@ -168,7 +179,9 @@ function randomMovementWithPhase(object, elapsed) {
 
   object.position.x = object.userData.startX + Math.sin(elapsed * frequency + phase) * amplitude;
   object.position.y = object.userData.startY + Math.cos(elapsed * frequency * 1.5 + phase) * amplitude;
-  object.position.z = object.userData.startZ + Math.sin(elapsed * frequency * 0.7 + phase) * amplitude;
+  object.position.z = object.userData.startZ + Math.sin(elapsed * frequency * 0.7 + phase) * amplitude - 5;
+
+  console.log(object.position.z)
 
 }
 
