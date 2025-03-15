@@ -26,4 +26,8 @@ Install [Node.js](https://nodejs.org)
 
 ## GLB Model
 
+Boulder by Poly by Google [CC-BY] via Poly Pizza
+
 ## Music and Sound effects
+
+Sound Effect by <a href="https://pixabay.com/users/karim-nessim-40448081/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=260274">karim nessim</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=260274">Pixabay</a>

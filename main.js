@@ -79,6 +79,22 @@ function addSoundToGLTFModel(model, audioFilePath) {
   model.add(sound);
 }
 
+let touchSound;
+
+function preloadTouchSound() {
+  const listener = new AudioListener();
+  camera.add(listener);
+
+  touchSound = new Audio(listener);
+
+  const audioLoader = new AudioLoader();
+  audioLoader.load('assets/audio/throw.mp3', function(buffer) {
+    touchSound.setBuffer(buffer);
+    touchSound.setLoop(false);
+    touchSound.setVolume(1.0);
+  });
+}
+
 
 function add3DText() {
   const loader = new FontLoader();
@@ -274,10 +290,15 @@ const init = () => {
     const target = scene.getObjectByName('fairy');
     if (target) {
       addSoundToGLTFModel(target, 'assets/audio/hey_listen.mp3')
+      preloadTouchSound();
     }
   });
 
   const onSelect = (event) => {
+
+    if (touchSound) {
+      touchSound.play();
+    }
 
     if (!bulletModel) return;
     const bullet = bulletModel.clone();
@@ -295,6 +316,8 @@ const init = () => {
   scene.add(controller);
   window.addEventListener('resize', onWindowResize, false);
 }
+
+
 add3DText()
 init();
 
