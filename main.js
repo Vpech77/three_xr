@@ -12,7 +12,8 @@ import {
   Audio, 
   AudioListener, 
   AudioLoader,
-  PositionalAudio
+  PositionalAudio,
+  AnimationMixer 
 } from 'three';
 
 import { ARButton } from 'three/addons/webxr/ARButton.js';
@@ -24,8 +25,9 @@ let controller;
 const objects = [];
 const bullets = [];
 const speed = 50;
-const clock = new Clock();
 let score = 0;
+const clock = new Clock();
+let mixer;
 
 function loadGLTF(name, x, y, z) {
 
@@ -34,9 +36,14 @@ function loadGLTF(name, x, y, z) {
     const piece = gltf.scene;
     piece.name = `${name}`;
     piece.position.set(x, y, z);
+    const animations = gltf.animations;
 
-    if (name === 'targetA') {
-      piece.rotateY(- Math.PI / 2);
+
+    if (animations && animations.length > 0) {
+      mixer = new AnimationMixer(piece);
+
+      const action = mixer.clipAction(animations[0]);
+      action.play();
     }
 
     scene.add(piece);
@@ -89,11 +96,11 @@ function spawnNewTarget() {
     target.userData.startX = x;
     target.userData.startY = y;
     target.userData.startZ = z;
-
+    addSoundToGLTFModel(target, 'assets/audio/hey_listen.mp3')
     scene.add(target);
 
   }, undefined, function (error) {
-    console.error('Erreur lors du chargement du modèle :', error);
+    console.error(error);
   });
 }
 
@@ -152,6 +159,10 @@ function removeModelAndSound(model) {
 const animate = () => {
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
+
+  if (mixer) {
+    mixer.update(delta);
+  }
 
   const target = scene.getObjectByName('fairy');
   if (target) {
