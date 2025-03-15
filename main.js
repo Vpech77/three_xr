@@ -59,9 +59,9 @@ function spawnNewTarget() {
   const { x, y, z } = generateRandomPosition();
 
   const loader = new GLTFLoader();
-  loader.load('assets/models/targetA.glb', function (gltf) {
+  loader.load('assets/models/fairy.glb', function (gltf) {
     const target = gltf.scene;
-    target.name = 'targetA';
+    target.name = 'fairy';
     target.rotateY(- Math.PI / 2);
     target.position.set(x, y, z);
     target.userData.phase = Math.random() * Math.PI * 2;
@@ -98,7 +98,7 @@ const animate = () => {
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
 
-  const target = scene.getObjectByName('targetA');
+  const target = scene.getObjectByName('fairy');
   if (target) {
     randomMovementWithPhase(target, elapsed);
   }
@@ -108,7 +108,8 @@ const animate = () => {
 
     if (target) {
       const distance = bullet.position.distanceTo(target.position);
-      if (distance < 0.5) {
+
+      if (distance < 2) {
 
         score++;
         console.log(`Cible touchée ! Score : ${score}`);
@@ -161,7 +162,7 @@ const init = () => {
     
   }
 
-  loadGLTF('targetA', 0, 1, -3)
+  loadGLTF('fairy', 0, 1, -10)
 
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
