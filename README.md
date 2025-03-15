@@ -1,175 +1,39 @@
-# three_vite_xr
-THREE.js + WebXR template using [Vite](https://vitejs.dev).
+# 👾 Three js - XR Project 👾
 
-Allows testing and modifying [official THREE.js WebXR examples](https://threejs.org/examples/?q=webxr) locally, at lightning speed.
+Basic THREE.js + WebXR project using [Fivos Doganis vite template](https://github.com/fdoganis/three_vite_xr).
 
-## Batteries included
+## 🚀 Launch 🚀
 
-Pre-configured to support :
+- Just simply head over to [vpech77.github.io/three_xr/](vpech77.github.io/three_xr/)
 
-- WebXR initialization
-- glTF file loading
-- ammo.js wasm physics library
-  - which is fast, but you might consider using the excellent and simpler [Cannon-es](https://fdoganis.github.io/slides/cannon.html) instead
-- VSCode launch scripts
-- THREE.js type definitions : for IntelliSense in VS Code
-- recommended VS Code extensions
-- deployment
+Or follow these steps:
 
-Have a look at vite.config.js and customize it to your needs (additional libraries, file formats etc.).
-
-## Installation
-
-Install [Node.js](https://nodejs.org)
-
+- Install [Node.js](https://nodejs.org)
 - Clone or download repo
 - run `npm install` : fetches and install all dependencies
 - `npm run dev` : launches a server and opens your browser in `https://localhost:5173` by default
-  - Edit your code : your changes are reflected instantly!
-- `npm run build` : packages all code and resources into the `dist` folder, ready for deployment.
 
-## HTTPS
+## 🕹️ Game mechanics 🕹️
 
-HTTPS is required to use the WebXR API
+1. Watch closely! A little fairy is fluttering all around you.
 
+2. Take aim and tap! Touch your screen to shoot her, but stay sharp—she’s fast!
 
-### Using Cloudflare Tunnel for free without an account or a domain (recommended)
+3. Keep the fun going! Another fairy will appear just a few seconds later.
 
-  - Install [Homebrew](https://brew.sh)
+4. Test your skills! Shoot as many fairies as you can and rack up your score.
 
-```bash
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
+5. Let the magical music enhance your experience!
 
-then follow instructions
+# 📑 Credits 📑
 
+## GLB Model
 
-```bash
-echo >> /Users/XXX/.zprofile
+- Boulder by Poly by Google [CC-BY] via Poly Pizza
+- ["Fairy | The Legend of Zelda: BOTW"](https://skfb.ly/6vAV6) by Lumhax is [licensed under Creative Commons Attribution](http://creativecommons.org/licenses/by/4.0/).
 
-echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/XXX/.zprofile
+## Music and Sound effects
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
-```
-
-  - **[Install `cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)**
-
-```bash
-brew install cloudflared
-```
-- run your app locally
-
-```bash
-npm run dev
-```
-
-- run `cloudflared` tunnel
-
-```bash
-cloudflared tunnel --url http://localhost:5173/
-```
-
-This will create a random temporary address ending in `*.trycloudflare.com`
-
-You can share this address by sending a link or by generating a QR code (very useful for mobile devices and some XR headsets).
-
-### Persistent link
-
-If you want more persistence, you should register a domain name, or connect your github account to [Cloudflare Pages](https://pages.cloudflare.com) for free.
-
-Alternatively, you could simply [use GitHub Pages to host your application persistently](https://sbcode.net/threejs/github-pages/).
-
-### Tunneling alternatives
-
-Check these tunneling alternatives such as `ngrok` or `zrok` for simple personal projects, use [tunneling solutions](https://github.com/anderspitman/awesome-tunneling) 
-
-
-### Manual HTTPS setup
-
-In order to use `https`, copy your certificates to the `.cert` folder, and change the `serve` command to:
-
-`"serve": "http-server dist -S -C .cert/cert.pem -K .cert/key.pem`
-
-## Deploying the App with GitHub Pages
-
-(original: https://github.com/meta-quest/webxr-first-steps?tab=readme-ov-file#build-and-deploy)
-
-This repository includes a ready-to-use GitHub Actions workflow located at `.github/workflows/deploy.yml`, which automates both the build and deployment to GitHub Pages. Once enabled, every time you push changes to the `main` branch, a new build will automatically be deployed.
-
-#### Steps to Enable GitHub Pages Deployment:
-
-0. **IMPORTANT: Set the `base` variable** in `vite.config.js` (default name `/three_vite_xr`) to the actual name of your repository. Your app will be deployed to https://[GITUSERNAME].github.io/[REPOSITORY_NAME] (for example https://fdoganis.github.io/three_vite_xr)
-1. **Fork this repository** to your own GitHub account.
-2. Navigate to your forked repository’s **Settings**.
-3. Scroll down to the **Pages** section.
-4. Under **Build and Deployment**, change the **Source** to **GitHub Actions**.
-
-Once this is set, GitHub Actions will handle the build and deployment process automatically. Any time you push changes to the `main` branch, the app will be built and deployed to GitHub Pages without any additional manual steps.
-
-You can monitor the status of the deployment job or manually re-run it via the **Actions** tab in your GitHub repository.
-
-### Deploying to Your Own Hosting Solution
-
-If you prefer to host the app yourself, you’ll need to manually build the app and then deploy the generated files to your hosting provider.
-
-To generate the build, run the following command:
-
-```bash
-npm run build
-```
-
-This will create a `dist` folder containing the static files for the app. You can then upload these files to your hosting platform of choice.
-
-
-# Credits
-
-- XR enhanced version of the original ```three_vite``` template : https://github.com/fdoganis/three_vite (MIT License)
-  
-- THREE.js WebXR code inspired by https://threejs.org/examples/webxr_ar_cones.html (MIT License)
-
-- Test model (red cube) from https://github.com/cx20/gltf-test/tree/master/sampleModels/Box (CC BY License)
-
-- Some very interesting features (emulator, github pages deployment) have been borrowed from https://github.com/meta-quest/webxr-first-steps  (MIT License)
-
-  - Make sure to check this excellent tutorial out! Even if it is mostly focused on VR, it is a great introduction on how to combine WebXR with THREE.js.
-  - See [Deployment Instructions](https://github.com/meta-quest/webxr-first-steps?tab=readme-ov-file#build-and-deploy)
-
-## Deploying the App with GitHub Pages
-
-(original: https://github.com/meta-quest/webxr-first-steps?tab=readme-ov-file#build-and-deploy)
-
-This repository includes a ready-to-use GitHub Actions workflow located at `.github/workflows/deploy.yml`, which automates both the build and deployment to GitHub Pages. Once enabled, every time you push changes to the `main` branch, a new build will automatically be deployed.
-
-#### Steps to Enable GitHub Pages Deployment:
-
-0. **IMPORTANT: Set the `base` variable** in `vite.config.js` (default name `/three_vite`) to the actual name of your repository. Your app will be deployed to https://[GITUSERNAME].github.io/[REPOSITORY_NAME] (for example https://fdoganis.github.io/three_vite)
-1. **Fork this repository** to your own GitHub account.
-2. Navigate to your forked repository’s **Settings**.
-3. Scroll down to the **Pages** section.
-4. Under **Build and Deployment**, change the **Source** to **GitHub Actions**.
-
-Once this is set, GitHub Actions will handle the build and deployment process automatically. Any time you push changes to the `main` branch, the app will be built and deployed to GitHub Pages without any additional manual steps.
-
-You can monitor the status of the deployment job or manually re-run it via the **Actions** tab in your GitHub repository.
-
-### Deploying to Your Own Hosting Solution
-
-If you prefer to host the app yourself, you’ll need to manually build the app and then deploy the generated files to your hosting provider.
-
-To generate the build, run the following command:
-
-```bash
-npm run build
-```
-
-This will create a `dist` folder containing the static files for the app. You can then upload these files to your hosting platform of choice.
-
-
-# Credits
-
-- Test model (red cube) from https://github.com/cx20/gltf-test/tree/master/sampleModels/Box (CC BY License)
-
-- Some very interesting features (such as github pages deployment) have been borrowed from https://github.com/meta-quest/webxr-first-steps (MIT License)
-
-  - Make sure to check this excellent tutorial out!
-  - See [Deployment Instructions](https://github.com/meta-quest/webxr-first-steps?tab=readme-ov-file#build-and-deploy)
+- Song of the storms from [The Legend of Zelda - Ocarina of Time](https://www.youtube.com/watch?v=UtgHZaq0EGs)
+- Hey listen from [The Legend of Zelda - Ocarina of Time](<https://en.wikipedia.org/wiki/Navi_(The_Legend_of_Zelda)>)
+- Throw Sound Effect by <a href="https://pixabay.com/users/karim-nessim-40448081/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=260274">karim nessim</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=260274">Pixabay</a>
