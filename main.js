@@ -9,7 +9,10 @@ import {
   SphereGeometry,
   MeshBasicMaterial,
   Mesh,
-
+  Audio, 
+  AudioListener, 
+  AudioLoader,
+  PositionalAudio
 } from 'three';
 
 import { ARButton } from 'three/addons/webxr/ARButton.js';
@@ -22,8 +25,10 @@ const objects = [];
 const bullets = [];
 const speed = 50;
 const clock = new Clock();
+let score = 0;
 
 function loadGLTF(name, x, y, z) {
+  
   const loader = new GLTFLoader();
   loader.load(`assets/models/${name}.glb`, function (gltf) {
     const piece = gltf.scene;
@@ -92,7 +97,20 @@ function randomMovementWithPhase(object, elapsed) {
 
 }
 
-let score = 0;
+function addBackgroundMusic() {
+  const listener = new AudioListener();
+  camera.add(listener);
+
+  const backgroundMusic = new Audio(listener);
+
+  const audioLoader = new AudioLoader();
+  audioLoader.load('assets/audio/song_storm.mp3', function(buffer) {
+    backgroundMusic.setBuffer(buffer);
+    backgroundMusic.setLoop(true);
+    backgroundMusic.setVolume(0.2);
+    backgroundMusic.play();
+  });
+}
 
 const animate = () => {
   const delta = clock.getDelta();
@@ -109,7 +127,7 @@ const animate = () => {
     if (target) {
       const distance = bullet.position.distanceTo(target.position);
 
-      if (distance < 2) {
+      if (distance < 3) {
 
         score++;
         console.log(`Cible touchée ! Score : ${score}`);
@@ -147,10 +165,17 @@ const init = () => {
   xrButton.style.backgroundColor = 'skyblue';
   document.body.appendChild(xrButton);
 
+  xrButton.addEventListener('click', () => {
+    addBackgroundMusic();
+
+  });
+
+
+
 
   const onSelect = (event) => {
 
-      const bulletGeometry = new SphereGeometry(0.05, 32, 32);
+      const bulletGeometry = new SphereGeometry(0.5, 32, 32);
       const bulletMaterial = new MeshBasicMaterial({ color: 0xff0000 });
       const bullet = new Mesh(bulletGeometry, bulletMaterial);
 
@@ -159,7 +184,7 @@ const init = () => {
     
       scene.add(bullet);
       bullets.push(bullet);
-    
+
   }
 
   loadGLTF('fairy', 0, 1, -10)
