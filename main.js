@@ -28,7 +28,7 @@ const clock = new Clock();
 let score = 0;
 
 function loadGLTF(name, x, y, z) {
-  
+
   const loader = new GLTFLoader();
   loader.load(`assets/models/${name}.glb`, function (gltf) {
     const piece = gltf.scene;
@@ -45,6 +45,23 @@ function loadGLTF(name, x, y, z) {
   }, undefined, function (error) {
     console.error(error);
   });
+}
+
+function addSoundToGLTFModel(model, audioFilePath) {
+  const listener = new AudioListener();
+  camera.add(listener);
+  const sound = new PositionalAudio(listener);
+
+  const audioLoader = new AudioLoader();
+  audioLoader.load(audioFilePath, function(buffer) {
+    sound.setBuffer(buffer);
+    sound.setRefDistance(5);
+    sound.setLoop(true);
+    sound.setVolume(1.0);
+    sound.play();
+  });
+
+  model.add(sound);
 }
 
 function generateRandomPosition() {
@@ -67,7 +84,6 @@ function spawnNewTarget() {
   loader.load('assets/models/fairy.glb', function (gltf) {
     const target = gltf.scene;
     target.name = 'fairy';
-    target.rotateY(- Math.PI / 2);
     target.position.set(x, y, z);
     target.userData.phase = Math.random() * Math.PI * 2;
     target.userData.startX = x;
@@ -112,6 +128,27 @@ function addBackgroundMusic() {
   });
 }
 
+function findSoundInModel(model) {
+  let sound = null;
+  model.traverse(child => {
+    if (child.type === 'Audio') {
+      sound = child;
+    }
+  });
+  return sound;
+}
+
+function removeModelAndSound(model) {
+  const sound = findSoundInModel(model)
+
+  if (sound) {
+    sound.stop();
+    model.remove(sound);
+  }
+  scene.remove(model);
+}
+
+
 const animate = () => {
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
@@ -131,11 +168,12 @@ const animate = () => {
 
         score++;
         console.log(`Cible touchée ! Score : ${score}`);
-        scene.remove(target);
+
+        removeModelAndSound(target);
 
         setTimeout(() => {
           spawnNewTarget();
-        }, 1_000);
+        }, 5_000);
 
         scene.remove(bullet);
         bullets.splice(index, 1);
@@ -167,10 +205,11 @@ const init = () => {
 
   xrButton.addEventListener('click', () => {
     addBackgroundMusic();
-
+    const target = scene.getObjectByName('fairy');
+    if (target) {
+      addSoundToGLTFModel(target, 'assets/audio/hey_listen.mp3')
+    }
   });
-
-
 
 
   const onSelect = (event) => {
