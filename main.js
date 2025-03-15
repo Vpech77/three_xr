@@ -29,19 +29,23 @@ const objects = [];
 const bullets = [];
 const speed = 50;
 let score = 0;
-let scoreMesh;
 const clock = new Clock();
 let mixer;
+let bulletModel;
 
-function loadGLTF(name, x, y, z) {
+const loader = new GLTFLoader();
+loader.load('assets/models/Boulder.glb', function(gltf) {
+  bulletModel = gltf.scene;
+});
 
+
+function loadGLTF() {
   const loader = new GLTFLoader();
-  loader.load(`assets/models/${name}.glb`, function (gltf) {
+  loader.load('assets/models/fairy.glb', function (gltf) {
     const piece = gltf.scene;
-    piece.name = `${name}`;
-    piece.position.set(x, y, z);
+    piece.name = 'fairy';
+    piece.position.set(0, 1, -10);
     const animations = gltf.animations;
-
 
     if (animations && animations.length > 0) {
       mixer = new AnimationMixer(piece);
@@ -81,7 +85,7 @@ function add3DText() {
   loader.load('assets/fonts/gentilis_bold.typeface.json', function(font) {
     const textGeometry = new TextGeometry(`Score: ${score}`, {
       font: font,
-      size: 0.2,
+      size: 0.1,
       depth: 0.02,
       curveSegments: 12,
       bevelEnabled: true,
@@ -91,13 +95,14 @@ function add3DText() {
       bevelSegments: 3
     });
 
-    const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+    const textMaterial = new MeshBasicMaterial({ color: 0x3498db });
     const scoreMesh = new Mesh(textGeometry, textMaterial);
 
     scoreMesh.name = 'text'
 
-    scoreMesh.position.set(-0.5, 0, -1);
+    scoreMesh.position.set(-0.8, 0.5, -1);
     scene.add(scoreMesh);
+
   });
 }
 
@@ -200,19 +205,28 @@ const animate = () => {
     randomMovementWithPhase(target, elapsed);
   }
 
+  const movingText = scene.getObjectByName('text');
+  if (movingText) {
+    movingText.position.x += 0.009;
+
+    if (movingText.position.x > 1.5) {
+      scene.remove(movingText);
+    }
+  }
+
   bullets.forEach((bullet, index) => {
     bullet.translateZ(-speed * delta);
 
     if (target) {
       const distance = bullet.position.distanceTo(target.position);
 
-      if (distance < 3) {
+      if (distance < 2) {
 
-        const text = scene.getObjectByName('text');
-        if (text) {
-          scene.remove(text);
-          add3DText()
+        if (movingText) {
+          scene.remove(movingText);
         }
+
+        add3DText()
 
         score++;
         console.log(`Cible touchée ! Score : ${score}`);
@@ -234,6 +248,10 @@ const animate = () => {
   });
   renderer.render(scene, camera);
 };
+
+
+
+
 
 const init = () => {
   scene = new Scene();
@@ -261,19 +279,16 @@ const init = () => {
 
   const onSelect = (event) => {
 
-      const bulletGeometry = new SphereGeometry(0.5, 32, 32);
-      const bulletMaterial = new MeshBasicMaterial({ color: 0xff0000 });
-      const bullet = new Mesh(bulletGeometry, bulletMaterial);
-
-      bullet.position.set( 0, 0, 0 ).applyMatrix4( controller.matrixWorld );
-      bullet.quaternion.setFromRotationMatrix( controller.matrixWorld );
-    
-      scene.add(bullet);
-      bullets.push(bullet);
-
+    if (!bulletModel) return;
+    const bullet = bulletModel.clone();
+    bullet.position.set(0, 0, 0).applyMatrix4(controller.matrixWorld);
+    bullet.quaternion.setFromRotationMatrix(controller.matrixWorld);
+  
+    scene.add(bullet);
+    bullets.push(bullet);
   }
 
-  loadGLTF('fairy', 0, 1, -10)
+  loadGLTF()
 
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
