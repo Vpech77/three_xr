@@ -4,7 +4,7 @@ Basic THREE.js + WebXR project using [Fivos Doganis vite template](https://githu
 
 ## 🚀 Launch 🚀
 
-- Just simply head over to [vpech77.github.io/three_xr/](vpech77.github.io/three_xr/)
+- Just simply head over to [https://vpech77.github.io/three_xr/](https://vpech77.github.io/three_xr/)
 
 Or follow these steps:
 
