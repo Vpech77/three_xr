@@ -13,12 +13,15 @@ import {
   AudioListener, 
   AudioLoader,
   PositionalAudio,
-  AnimationMixer 
+  AnimationMixer,
+
 } from 'three';
 
 import { ARButton } from 'three/addons/webxr/ARButton.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 let camera, scene, renderer;
 let controller;
@@ -26,6 +29,7 @@ const objects = [];
 const bullets = [];
 const speed = 50;
 let score = 0;
+let scoreMesh;
 const clock = new Clock();
 let mixer;
 
@@ -70,6 +74,33 @@ function addSoundToGLTFModel(model, audioFilePath) {
 
   model.add(sound);
 }
+
+
+function add3DText() {
+  const loader = new FontLoader();
+  loader.load('assets/fonts/gentilis_bold.typeface.json', function(font) {
+    const textGeometry = new TextGeometry(`Score: ${score}`, {
+      font: font,
+      size: 0.2,
+      depth: 0.02,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.005,
+      bevelSize: 0.002,
+      bevelOffset: 0,
+      bevelSegments: 3
+    });
+
+    const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+    const scoreMesh = new Mesh(textGeometry, textMaterial);
+
+    scoreMesh.name = 'text'
+
+    scoreMesh.position.set(-0.5, 0, -1);
+    scene.add(scoreMesh);
+  });
+}
+
 
 function generateRandomPosition() {
   const rangeX = 2;
@@ -177,6 +208,12 @@ const animate = () => {
 
       if (distance < 3) {
 
+        const text = scene.getObjectByName('text');
+        if (text) {
+          scene.remove(text);
+          add3DText()
+        }
+
         score++;
         console.log(`Cible touchée ! Score : ${score}`);
 
@@ -222,7 +259,6 @@ const init = () => {
     }
   });
 
-
   const onSelect = (event) => {
 
       const bulletGeometry = new SphereGeometry(0.5, 32, 32);
@@ -244,7 +280,7 @@ const init = () => {
   scene.add(controller);
   window.addEventListener('resize', onWindowResize, false);
 }
-
+add3DText()
 init();
 
 function onWindowResize() {
